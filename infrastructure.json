@@ -1,0 +1,66 @@
+{
+  "version": "1",
+  "name": "Coffee Rewards Tracker",
+  "description": "A web application for tracking coffee consumption with a gamified rewards system. Users can log their daily coffee intake, set goals, track progress, and earn rewards. Features monthly SaaS subscriptions with payment processing. Designed specifically for programmers who prefer desktop interfaces and keyboard shortcuts over mobile apps.",
+  "environments": {
+    "main": {
+      "resources": {
+        "envFeatures": {
+          "vpc": {
+            "enabled": false
+          },
+          "auth": {
+            "enabled": true,
+            "allowAdminCreateUserOnly": true,
+            "mfaRequired": true,
+            "alertsEnabled": true
+          },
+          "restApiV1": {
+            "enabled": false
+          },
+          "httpApiV2": {
+            "enabled": true
+          },
+          "defaultAlarmsEnabled": true,
+          "defaultDatabaseRetention": 35,
+          "defaultLogsRetention": 365,
+          "defaultRequireManualCicdApproval": false
+        },
+        "services": {
+          "frontend": {
+            "stackType": "STATIC_FRONTEND",
+            "enabled": true,
+            "webHostname": "www",
+            "buildScriptPath": "frontend/build.sh",
+            "buildFolderPath": "frontend/dist",
+            "description": "React/Vue SPA optimized for desktop use with keyboard shortcuts, user dashboard for coffee logging, goal tracking, and subscription management. Includes authentication flows and payment forms.",
+            "auth": {
+              "enabled": true,
+              "allowAdminCreateUserOnly": true,
+              "emailPasswordEnabled": true,
+              "googleEnabled": false,
+              "oidcEnabled": false,
+              "analyticsEnabled": false,
+              "mfaRequired": false,
+              "callbackUri": "callback",
+              "logoutUri": "logout",
+              "localhostUrl": "http://localhost:5173"
+            }
+          },
+          "api": {
+            "stackType": "FUNCTION",
+            "functionTrigger": "HTTP_API_TRIGGER",
+            "enabled": true,
+            "description": "Main API handling user management, coffee entry CRUD operations, goal tracking, progress calculations, and rewards logic. Integrates with DynamoDB for data persistence and Cognito for authentication."
+          },
+          "payments": {
+            "stackType": "FUNCTION",
+            "functionTrigger": "HTTP_API_QUEUE_TRIGGER",
+            "enabled": true,
+            "description": "Dedicated payment processing function handling subscription payments, webhook processing from payment providers (Stripe), and subscription status updates. Uses queue-based processing for reliability."
+          }
+        }
+      }
+    }
+  }
+}
