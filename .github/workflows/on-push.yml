@@ -1,0 +1,132 @@
+
+name: Invoke restack.dev on push to main
+on:
+  push:
+    branches: [ "**" ]
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  call-lambda:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: us-east-1
+      AWS_ACCOUNT_ID: 578295146757
+      OWNER: ${{ github.repository_owner }}
+      REPO: ${{ github.event.repository.name }}
+      BRANCH: ${{ github.ref_name }}
+      SHA: ${{ github.sha }}
+
+    steps:
+      - name: Configure AWS creds (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubOIDCRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 1
+
+      - name: Build zip
+        run: |
+          mkdir -p dist
+          zip -qr dist/app.zip . -x ".git/*"
+          ZIP_BYTES=$(wc -c < dist/app.zip | tr -d ' ')
+          ZIP_SHA256=$(shasum -a 256 dist/app.zip | awk '{print $1}')
+          echo "ZIP_BYTES=$ZIP_BYTES" >> $GITHUB_ENV
+          echo "ZIP_SHA256=$ZIP_SHA256" >> $GITHUB_ENV
+
+      - name: StartUpload → get presigned URL
+        id: start
+        shell: bash
+        run: |
+          set -euo pipefail
+      
+          REQ=$(jq -n \
+            --arg owner "$OWNER" \
+            --arg repo "$REPO" \
+            --arg branch "$BRANCH" \
+            --arg sha "$SHA" \
+            --arg zipSha256 "$ZIP_SHA256" \
+            --argjson zipBytes ${ZIP_BYTES:-0} \
+            '{useCase:"startRepoMirrorUpload", owner:$owner, repo:$repo, branch:$branch, sha:$sha, zip:{bytes:$zipBytes, sha256:$zipSha256}}')
+      
+          OUT=/tmp/lambda_payload.json
+          aws lambda invoke \
+            --function-name wca-github-action-handler \
+            --payload "$REQ" \
+            --cli-binary-format raw-in-base64-out \
+            "$OUT" >/dev/null
+      
+          echo "---- Lambda payload ----"
+          jq . "$OUT"
+      
+          UPLOAD_ID=$(jq -r '.uploadId // empty' "$OUT")
+          # Strip any CR/LF defensively (shouldn't be present, but harmless)
+          PUT_URL=$(jq -r '.putUrl // empty | gsub("\r|\n"; "")' "$OUT")
+      
+          if [[ -z "$PUT_URL" ]]; then
+            echo "ERROR: putUrl missing from Lambda response"; exit 1
+          fi
+          # Assert single line and no whitespace
+          if echo "$PUT_URL" | grep -q '[[:space:]]'; then
+            echo "ERROR: putUrl contains whitespace"; exit 1
+          fi
+      
+          {
+            printf 'UPLOAD_ID=%s\n' "$UPLOAD_ID"
+            printf 'PUT_URL=%s\n' "$PUT_URL"
+          } >> "$GITHUB_ENV"
+
+      - name: Upload zip to presigned URL (PUT)
+        shell: bash
+        run: |
+          set -euo pipefail
+      
+          if [[ -z "${PUT_URL:-}" ]]; then
+            echo "ERROR: PUT_URL is empty"; exit 1
+          fi
+          echo "PUT_URL (first 80 chars): ${PUT_URL:0:80}..."
+      
+          RESP_HEADERS=$(mktemp)
+          RESP_BODY=$(mktemp)
+      
+          HTTP_CODE=$(
+            curl -sS -X PUT \
+              --retry 2 --retry-delay 2 \
+              --upload-file dist/app.zip \
+              -D "$RESP_HEADERS" \
+              -o "$RESP_BODY" \
+              -w "%{http_code}" \
+              "$PUT_URL" || true
+          )
+      
+          echo "HTTP $HTTP_CODE"
+          echo "---- Response headers ----"
+          cat "$RESP_HEADERS" || true
+          if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 400 ]]; then
+            echo "---- Response body ----"
+            cat "$RESP_BODY" || true
+            exit 1
+          fi
+
+      - name: FinalizeUpload
+        env:
+          ACTOR: ${{ github.actor }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          REQ=$(jq -n --arg uploadId "$UPLOAD_ID" --arg actor "$ACTOR" --arg sha "$SHA" --arg runId "$RUN_ID" --arg runAttempt "$RUN_ATTEMPT" '{useCase:"finalizeRepoMirrorUpload", uploadId:$uploadId, actor:$actor, sha:$sha, runid:($runId|tonumber), runattempt:($runAttempt|tonumber)}')
+          aws lambda invoke \
+            --function-name wca-github-action-handler \
+            --payload "$REQ" \
+            --cli-binary-format raw-in-base64-out \
+            /dev/stdout
