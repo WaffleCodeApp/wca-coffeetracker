@@ -19,7 +19,7 @@ This project consists of the following components:
 
 ### frontend
 
-**Type**: Static Frontend (React/Vue/Angular SPA)
+**Type**: Static Frontend (React SPA)
 **Description**: React/Vue SPA optimized for desktop use with keyboard shortcuts, user dashboard for coffee logging, goal tracking, and subscription management. Includes authentication flows and payment forms.
 **Integration**: AWS Cognito authentication
 
