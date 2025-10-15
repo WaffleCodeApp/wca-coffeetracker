@@ -93,10 +93,9 @@ You can create additional environments (such as development, staging, etc.) thro
 
 This repository is pre-configured for deployment to the restack.dev platform:
 
-1. **Automatic Deployment**: Push to `develop` branch for development environment
-2. **Production Deployment**: Create pull request to `main` branch for production
-3. **Infrastructure Updates**: Modify `infrastructure.json` to change AWS resources
-4. **Service Updates**: Update service code in respective folders
+1. **Production Deployment**: Create pull request to `main` branch for production
+2. **Infrastructure Updates**: Modify `infrastructure.json` to change AWS resources
+3. **Service Updates**: Update service code in respective folders
 
 ## Service Details
 
