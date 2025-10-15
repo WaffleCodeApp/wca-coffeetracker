@@ -228,7 +228,7 @@ AWS Cognito User Pool for user authentication and authorization.
 - **API Key Management**: Best choice if you need API keys handled by the API Gateway
 - **Manual Configuration**: Must be manually enabled in the config file (AI doesn't auto-enable this)
 
-Both are auto-enabled when VPC is enabled with containerized backend services.
+Both are auto-enabled with containerized backend services.
 
 #### Custom Domain Configuration
 
