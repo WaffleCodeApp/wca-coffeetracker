@@ -90,7 +90,7 @@ This project includes the following service types:
 ### Service Discovery
 - Store function ARNs, SQS URLs, or SNS topics in SSM for other services to discover
 - Use SSM paths like: /{deploymentId}/cfn/{stackName}/functionArn
-- Enable cross-service communication through well-defined interfaces
+- Enable cross-service communication through well-defined interfaces (AWS CloudFormation exports and AWS SSM parameters)
 
 
 ## Environment Configuration
