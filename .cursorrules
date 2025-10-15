@@ -12,7 +12,7 @@ This project includes the following service types:
 
 ### frontend
 - **Type**: STATIC_FRONTEND
-- **Description**: React/Vue SPA optimized for desktop use with keyboard shortcuts, user dashboard for coffee logging, goal tracking, and subscription management. Includes authentication flows and payment forms.
+- **Description**: React SPA optimized for desktop use with keyboard shortcuts, user dashboard for coffee logging, goal tracking, and subscription management. Includes authentication flows and payment forms.
 - **Integration**: Cognito Authentication
 
 ### api
