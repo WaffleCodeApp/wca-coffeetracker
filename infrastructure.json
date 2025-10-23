@@ -33,7 +33,7 @@
             "webHostname": "www",
             "buildScriptPath": "frontend/build.sh",
             "buildFolderPath": "frontend/dist",
-            "description": "React/Vue SPA optimized for desktop use with keyboard shortcuts, user dashboard for coffee logging, goal tracking, and subscription management. Includes authentication flows and payment forms.",
+            "description": "React SPA optimized for desktop use with keyboard shortcuts, user dashboard for coffee logging, goal tracking, and subscription management. Includes authentication flows and payment forms.",
             "auth": {
               "enabled": true,
               "allowAdminCreateUserOnly": true,
