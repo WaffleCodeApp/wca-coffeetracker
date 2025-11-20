@@ -11,7 +11,7 @@ app = FastAPI(
     title="My Function API",
     description="AWS Lambda function with FastAPI for HTTP API Trigger",
     version="1.0.0",
-    root_path=f"/{os.getenv('PIPELINE_ID')}",
+    # root_path=f"/{os.getenv('PIPELINE_ID')}",
 )
 
 app.add_middleware(
