@@ -22,6 +22,7 @@ function determineConnectionConfig(): ConnectionConfig {
   const buildEnvVarsJson = import.meta.env.VITE_BUILD_ENV_VARS_JSON;
   const deploymentDomainName = import.meta.env.VITE_DEPLOYMENT_DOMAIN_NAME;
   const httpApiV2Host = import.meta.env.VITE_HTTP_API_V2_HOST;
+  const restApiV1Host = import.meta.env.VITE_REST_API_V1_HOST;
 
   console.log("📥 [api_config] Environment variables received:", {
     hasVITE_BUILD_ENV_VARS_JSON: !!buildEnvVarsJson,
@@ -31,6 +32,8 @@ function determineConnectionConfig(): ConnectionConfig {
     VITE_DEPLOYMENT_DOMAIN_NAME: deploymentDomainName || "undefined",
     hasVITE_HTTP_API_V2_HOST: !!httpApiV2Host,
     VITE_HTTP_API_V2_HOST: httpApiV2Host || "undefined",
+    hasVITE_REST_API_V1_HOST: !!restApiV1Host,
+    VITE_REST_API_V1_HOST: restApiV1Host || "undefined",
   });
 
   if (!buildEnvVarsJson || !deploymentDomainName) {
@@ -97,30 +100,59 @@ function determineConnectionConfig(): ConnectionConfig {
     console.log("🌐 [api_config] Checking HTTP API V2 configuration...");
     if (envFeatures.httpApiV2?.enabled) {
       console.log("  ✅ HTTP API V2 is enabled");
-      const subdomain = envFeatures.httpApiV2.subdomain || "api";
-      console.log(`  📍 Using subdomain: "${subdomain}"`);
       
-      const serviceName = findServiceName((service) => {
-        if (service.stackType === "FUNCTION") {
-          return service.functionTrigger === "HTTP_API_TRIGGER" || 
-                 service.functionTrigger === "HTTP_API_QUEUE_TRIGGER";
-        }
-        if (service.stackType === "CONTAINER") {
-          return service.integration === "API_GATEWAY";
-        }
-        return false;
-      }, "HTTP_API_V2 (FUNCTION with HTTP_API_TRIGGER/HTTP_API_QUEUE_TRIGGER or CONTAINER with API_GATEWAY)");
+      if (!httpApiV2Host) {
+        console.warn("  ⚠️ HTTP API V2 is enabled but VITE_HTTP_API_V2_HOST is not set, falling back to subdomain construction");
+        const subdomain = envFeatures.httpApiV2.subdomain || "httpapi";
+        console.log(`  📍 Using subdomain: "${subdomain}"`);
+        
+        const serviceName = findServiceName((service) => {
+          if (service.stackType === "FUNCTION") {
+            return service.functionTrigger === "HTTP_API_TRIGGER" || 
+                   service.functionTrigger === "HTTP_API_QUEUE_TRIGGER";
+          }
+          if (service.stackType === "CONTAINER") {
+            return service.integration === "API_GATEWAY";
+          }
+          return false;
+        }, "HTTP_API_V2 (FUNCTION with HTTP_API_TRIGGER/HTTP_API_QUEUE_TRIGGER or CONTAINER with API_GATEWAY)");
 
-      if (serviceName) {
-        const config = {
-          host: `${subdomain}.${deploymentDomainName}`,
-          path: `/${serviceName}/hello_world`,
-        };
-        console.log("✅ [api_config] Using HTTP API V2 configuration:", config);
-        console.log("🔗 [api_config] Full URL will be:", `https://${config.host}${config.path}`);
-        return config;
+        if (serviceName) {
+          const config = {
+            host: `${subdomain}.${deploymentDomainName}`,
+            path: `/${serviceName}/hello_world`,
+          };
+          console.log("✅ [api_config] Using HTTP API V2 configuration (fallback):", config);
+          console.log("🔗 [api_config] Full URL will be:", `https://${config.host}${config.path}`);
+          return config;
+        } else {
+          console.log("  ⚠️ HTTP API V2 enabled but no matching service found");
+        }
       } else {
-        console.log("  ⚠️ HTTP API V2 enabled but no matching service found");
+        console.log(`  📍 Using VITE_HTTP_API_V2_HOST: "${httpApiV2Host}"`);
+        
+        const serviceName = findServiceName((service) => {
+          if (service.stackType === "FUNCTION") {
+            return service.functionTrigger === "HTTP_API_TRIGGER" || 
+                   service.functionTrigger === "HTTP_API_QUEUE_TRIGGER";
+          }
+          if (service.stackType === "CONTAINER") {
+            return service.integration === "API_GATEWAY";
+          }
+          return false;
+        }, "HTTP_API_V2 (FUNCTION with HTTP_API_TRIGGER/HTTP_API_QUEUE_TRIGGER or CONTAINER with API_GATEWAY)");
+
+        if (serviceName) {
+          const config = {
+            host: httpApiV2Host,
+            path: `/${serviceName}/hello_world`,
+          };
+          console.log("✅ [api_config] Using HTTP API V2 configuration:", config);
+          console.log("🔗 [api_config] Full URL will be:", `https://${config.host}${config.path}`);
+          return config;
+        } else {
+          console.log("  ⚠️ HTTP API V2 enabled but no matching service found");
+        }
       }
     } else {
       console.log("  ❌ HTTP API V2 is not enabled");
@@ -130,30 +162,59 @@ function determineConnectionConfig(): ConnectionConfig {
     console.log("🌐 [api_config] Checking REST API V1 configuration...");
     if (envFeatures.restApiV1?.enabled) {
       console.log("  ✅ REST API V1 is enabled");
-      const subdomain = envFeatures.restApiV1.subdomain || "api";
-      console.log(`  📍 Using subdomain: "${subdomain}"`);
       
-      const serviceName = findServiceName((service) => {
-        if (service.stackType === "FUNCTION") {
-          return service.functionTrigger === "HTTP_API_TRIGGER" || 
-                 service.functionTrigger === "HTTP_API_QUEUE_TRIGGER";
-        }
-        if (service.stackType === "CONTAINER") {
-          return service.integration === "API_GATEWAY";
-        }
-        return false;
-      }, "REST_API_V1 (FUNCTION with HTTP_API_TRIGGER/HTTP_API_QUEUE_TRIGGER or CONTAINER with API_GATEWAY)");
+      if (!restApiV1Host) {
+        console.warn("  ⚠️ REST API V1 is enabled but VITE_REST_API_V1_HOST is not set, falling back to subdomain construction");
+        const subdomain = envFeatures.restApiV1.subdomain || "restapi";
+        console.log(`  📍 Using subdomain: "${subdomain}"`);
+        
+        const serviceName = findServiceName((service) => {
+          if (service.stackType === "FUNCTION") {
+            return service.functionTrigger === "HTTP_API_TRIGGER" || 
+                   service.functionTrigger === "HTTP_API_QUEUE_TRIGGER";
+          }
+          if (service.stackType === "CONTAINER") {
+            return service.integration === "API_GATEWAY";
+          }
+          return false;
+        }, "REST_API_V1 (FUNCTION with HTTP_API_TRIGGER/HTTP_API_QUEUE_TRIGGER or CONTAINER with API_GATEWAY)");
 
-      if (serviceName) {
-        const config = {
-          host: `${subdomain}.${deploymentDomainName}`,
-          path: `/${serviceName}/hello_world`,
-        };
-        console.log("✅ [api_config] Using REST API V1 configuration:", config);
-        console.log("🔗 [api_config] Full URL will be:", `https://${config.host}${config.path}`);
-        return config;
+        if (serviceName) {
+          const config = {
+            host: `${subdomain}.${deploymentDomainName}`,
+            path: `/${serviceName}/hello_world`,
+          };
+          console.log("✅ [api_config] Using REST API V1 configuration (fallback):", config);
+          console.log("🔗 [api_config] Full URL will be:", `https://${config.host}${config.path}`);
+          return config;
+        } else {
+          console.log("  ⚠️ REST API V1 enabled but no matching service found");
+        }
       } else {
-        console.log("  ⚠️ REST API V1 enabled but no matching service found");
+        console.log(`  📍 Using VITE_REST_API_V1_HOST: "${restApiV1Host}"`);
+        
+        const serviceName = findServiceName((service) => {
+          if (service.stackType === "FUNCTION") {
+            return service.functionTrigger === "HTTP_API_TRIGGER" || 
+                   service.functionTrigger === "HTTP_API_QUEUE_TRIGGER";
+          }
+          if (service.stackType === "CONTAINER") {
+            return service.integration === "API_GATEWAY";
+          }
+          return false;
+        }, "REST_API_V1 (FUNCTION with HTTP_API_TRIGGER/HTTP_API_QUEUE_TRIGGER or CONTAINER with API_GATEWAY)");
+
+        if (serviceName) {
+          const config = {
+            host: restApiV1Host,
+            path: `/${serviceName}/hello_world`,
+          };
+          console.log("✅ [api_config] Using REST API V1 configuration:", config);
+          console.log("🔗 [api_config] Full URL will be:", `https://${config.host}${config.path}`);
+          return config;
+        } else {
+          console.log("  ⚠️ REST API V1 enabled but no matching service found");
+        }
       }
     } else {
       console.log("  ❌ REST API V1 is not enabled");
