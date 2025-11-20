@@ -7,7 +7,7 @@ from api import app
 handler = Mangum(
     app,
     lifespan="off",
-    api_gateway_base_path=f"/{os.getenv('PIPELINE_ID') or ''}",
+    api_gateway_base_path=f"/Prod/{os.getenv('PIPELINE_ID') or ''}",
 )
 
 
