@@ -31,7 +31,7 @@
             "stackType": "STATIC_FRONTEND",
             "enabled": true,
             "webHostname": "www",
-            "buildScriptPath": "frontend/build.sh",
+            "buildScriptPath": "build.sh",
             "buildFolderPath": "frontend/dist",
             "description": "React SPA optimized for desktop use with keyboard shortcuts, user dashboard for coffee logging, goal tracking, and subscription management. Includes authentication flows and payment forms.",
             "auth": {
