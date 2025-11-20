@@ -6,12 +6,19 @@ import { apiConfig } from "./api_config";
 import { Authenticator } from "@aws-amplify/ui-react";
 
 const HelloWorld = () => {
-  const { fetchWithToken, idToken } = useContext(AuthenticationContext);
+  const { fetchWithToken, idToken, authToken } = useContext(AuthenticationContext);
   const [data, setData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for authentication to be ready before making the request
+    if (!authToken || !idToken) {
+      console.log("⏳ [app] Waiting for authentication tokens...");
+      setLoading(true);
+      return;
+    }
+
     const fetchHelloWorld = async () => {
       try {
         setLoading(true);
@@ -67,7 +74,7 @@ const HelloWorld = () => {
     };
 
     fetchHelloWorld();
-  }, [fetchWithToken, idToken]);
+  }, [fetchWithToken, idToken, authToken]);
 
   if (loading) {
     return (

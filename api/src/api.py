@@ -1,13 +1,17 @@
+import os
+import logging
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from infrastructure.id_token import IdTokenWithJose
+
+logger = logging.getLogger(__name__)
 
 # Create FastAPI application
 app = FastAPI(
     title="My Function API",
     description="AWS Lambda function with FastAPI for HTTP API Trigger",
     version="1.0.0",
-    root_path=f"/Prod/{os.getenv('PIPELINE_ID')}",
+    root_path=f"/{os.getenv('PIPELINE_ID')}",
 )
 
 app.add_middleware(
