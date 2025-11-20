@@ -33,7 +33,7 @@
             "webHostname": "www",
             "buildScriptPath": "build.sh",
             "buildFolderPath": "frontend/dist",
-            "description": "React SPA optimized for desktop use, user dashboard for coffee logging, goal tracking, and subscription management.",
+            "description": "SPA optimized for desktop use, user dashboard for coffee logging, goal tracking, and subscription management.",
             "auth": {
               "enabled": true,
               "allowAdminCreateUserOnly": true,
