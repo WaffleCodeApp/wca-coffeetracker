@@ -1,5 +1,8 @@
 FROM public.ecr.aws/docker/library/python:3.12
 
+# Ensure Python output is unbuffered so logs appear immediately in CloudWatch
+ENV PYTHONUNBUFFERED=1
+
 # Set working directory
 WORKDIR /app
 

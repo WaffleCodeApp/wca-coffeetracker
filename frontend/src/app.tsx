@@ -18,8 +18,18 @@ const HelloWorld = () => {
         setError(null);
         
         // Construct the URL using apiConfig
-        const url = `${apiConfig.my_container.protocol}${apiConfig.my_container.host}${apiConfig.my_container.path}/hello_world`;
+        // Path is already determined based on infrastructure config (includes service name and endpoint)
+        console.log("🌐 [app] Constructing URL from apiConfig:", {
+          protocol: apiConfig.aBackendService.protocol,
+          host: apiConfig.aBackendService.host,
+          path: apiConfig.aBackendService.path,
+          full_config: apiConfig,
+        });
         
+        const url = `${apiConfig.aBackendService.protocol}${apiConfig.aBackendService.host}${apiConfig.aBackendService.path}`;
+        console.log("🔗 [app] Final URL to fetch:", url);
+        
+        console.log("📤 [app] Making request with fetchWithToken...");
         const response = await fetchWithToken(url, {
           method: 'GET',
           headers: {
@@ -27,15 +37,30 @@ const HelloWorld = () => {
           },
         });
 
+        console.log("📥 [app] Response received:", {
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries()),
+        });
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text().catch(() => 'Unable to read error response');
+          console.error("❌ [app] HTTP error response body:", errorText);
+          throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
         }
 
         const result = await response.text();
+        console.log("✅ [app] Successfully received response:", result);
         setData(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('Error fetching hello world:', err);
+        const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+        console.error('❌ [app] Error fetching hello world:', {
+          error: err,
+          message: errorMessage,
+          stack: err instanceof Error ? err.stack : undefined,
+        });
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -95,7 +120,8 @@ const HelloWorld = () => {
         borderRadius: '8px',
         border: '1px solid #ddd',
         fontFamily: 'monospace',
-        fontSize: '16px'
+        fontSize: '16px',
+        color: '#000000'
       }}>
         {data}
       </div>
@@ -137,7 +163,14 @@ export const App = () => {
   }
 
   return (
-    <Authenticator>
+    <Authenticator
+      // Self-signup is disabled by default. Users must be created by an admin.
+      // To enable self-signup:
+      // 1. Remove the hideSignUp prop below (or set it to false)
+      // 2. In infrastructure.json, set allowAdminCreateUserOnly to false in the 
+      //    frontend authentication settings to enable self-signup on the backend side as well
+      hideSignUp={true}
+    >
       <AuthenticationProvider>
         <HelloWorld />
       </AuthenticationProvider>

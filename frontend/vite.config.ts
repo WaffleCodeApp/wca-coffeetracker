@@ -33,6 +33,9 @@ export default defineConfig({
     "import.meta.env.VITE_DEPLOYMENT_DOMAIN_NAME": JSON.stringify(
       process.env.VITE_DEPLOYMENT_DOMAIN_NAME
     ),
+    "import.meta.env.VITE_BUILD_ENV_VARS_JSON": JSON.stringify(
+      process.env.VITE_BUILD_ENV_VARS_JSON
+    ),
     "import.meta.env.VITE_PIPELINE_ID": JSON.stringify(
       process.env.VITE_PIPELINE_ID
     ),
