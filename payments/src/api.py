@@ -1,6 +1,10 @@
+import os
+import logging
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from infrastructure.id_token import IdTokenWithJose
+
+logger = logging.getLogger(__name__)
 
 # Create FastAPI application
 app = FastAPI(
