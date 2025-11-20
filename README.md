@@ -1,6 +1,6 @@
 # Coffee Rewards Tracker
 
-A web application for tracking coffee consumption with a rewards system. Users can log their daily coffee intake, set goals, track progress, and earn rewards. Features monthly SaaS subscriptions with payment processing. Designed specifically for programmers who prefer desktop computers and keyboard shortcuts over mobile apps.
+A web application for tracking coffee consumption with a rewards system. Users can log their daily coffee intake, set goals, track progress, and earn rewards. Features monthly SaaS subscriptions with payment processing. Designed specifically for programmers who prefer desktop computers and keyboard shortcuts over mobile apps. 
 
 ## Overview
 
