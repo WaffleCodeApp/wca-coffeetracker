@@ -57,7 +57,7 @@
             "stackType": "FUNCTION",
             "functionTrigger": "HTTP_API_QUEUE_TRIGGER",
             "enabled": true,
-            "description": "Dedicated payment processing function handling subscription payments, webhook processing from payment providers (Stripe), and subscription status updates. Uses queue-based processing for reliability."
+            "description": "Dedicated payment processing function handling subscription payments, webhook processing from payment providers, and subscription status updates. Uses queue-based processing for reliability."
           }
         }
       }
