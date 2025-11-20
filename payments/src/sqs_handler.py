@@ -2,7 +2,7 @@ import json
 import base64
 from typing import Dict, Any
 from fastapi.testclient import TestClient
-from .api import app
+from api import app
 
 def handle_sqs_event(event: Dict[str, Any], context) -> Dict[str, Any]:
     """

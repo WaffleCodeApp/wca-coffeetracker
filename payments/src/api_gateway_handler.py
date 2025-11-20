@@ -1,7 +1,7 @@
 import os
 from typing import Dict, Any
 from mangum import Mangum
-from .api import app
+from api import app
 
 # Create Mangum adapter for AWS Lambda
 handler = Mangum(

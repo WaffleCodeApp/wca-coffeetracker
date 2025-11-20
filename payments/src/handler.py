@@ -2,9 +2,9 @@ import asyncio
 import json
 import os
 from typing import Dict, Any
-from .api_gateway_handler import is_api_gateway_event, handle_api_gateway_event
-from .sqs_handler import handle_sqs_event
-from .infrastructure import initialize
+from api_gateway_handler import is_api_gateway_event, handle_api_gateway_event
+from sqs_handler import handle_sqs_event
+from infrastructure import initialize
 
 
 if "AWS_EXECUTION_ENV" in os.environ:
