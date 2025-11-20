@@ -2,5 +2,6 @@ fastapi>=0.104.0
 mangum>=0.17.0
 awslambdaric>=2.0.0
 httpx>=0.25.0
+python-jose
 boto3
 requests
